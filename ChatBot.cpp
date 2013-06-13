@@ -11,7 +11,6 @@ ChatBot::~ChatBot()
 
 }
 
-
 // Verbindung zum Server aufbauen
 void ChatBot::connectToServer(const char *host, int port)
 {
