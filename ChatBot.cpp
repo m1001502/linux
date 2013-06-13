@@ -1,81 +1,123 @@
 #include "ChatBot.h"
 
 // Konstruktor
-ChatBot::ChatBot()
+ChatBot::ChatBot(string nickname, string password)
 {
+    this->nickname = nickname;
+    this->password = password;
+    this->bLogging = false;
+    connect = NULL;
 
 }
+
 // Destruktor
 ChatBot::~ChatBot()
 {
-
+    delete connect;
 }
 
-// Verbindung zum Server aufbauen
-void ChatBot::connectToServer(const char *host, int port)
+void ChatBot::ChatBotLoop()
 {
-    // Socket wird erstellt
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0)
-    {
-        perror("Fehler Socket");
-        disconnect();
-        exit(1);
-    }
-
-    // Host wird ueberprueft
-    hostent *hp = gethostbyname(host);
-    if (!hp)
-    {
-        perror("Host nicht gefunden...");
-        disconnect();
-        exit(1);
-    }
-
-    // Serverinformation wird festgelegt
-    sockaddr_in sin;
-    memset((char*)&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    memcpy((char*)&sin.sin_addr, hp->h_addr, hp->h_length);
-    sin.sin_port = htons(port);
-    memset(&(sin.sin_zero), 0, 8*sizeof(char));
-
-    // Verbindung mit dem Server
-    if (connect(sock, (sockaddr*) &sin, sizeof(sin)) == -1)
-    {
-        perror("Verbindung fehlgeschlagen...");
-        disconnect();
-        exit(1);
+    string message;
+    for (;;) {
+        if (!connect->Receive(message))
+            break;
+        cout << message << endl;
+        connect->PingPong(message);
+        if (ChatBotFunctions(message) == -1)
+            break;
     }
 }
 
-// Verbindung trennen
-void ChatBot::disconnect()
+void ChatBot::LoginBot(string host, int port, string channel)
 {
-    close(sock);
+    connect = new IrcConnect(host, port, channel);
+    connect->Connect();
+    connect->Identify(nickname, password, channel);
+    ChatBotLoop();
+    connect->Disconnect();
 }
 
-// Funktion um Nachrichten an den Server zu schicken
-void ChatBot::sendToServer(string m)
+
+void ChatBot::ChangeTopic(string topic)
 {
-    send(sock, m.c_str(), m.length(), 0);
+    connect->Send("TOPIC #" + connect->GetChannel() + " " + topic + "\r\n");
+}
+void ChatBot::Nick(string nickname)
+{
+    connect->Send("NICK " + nickname + "\r\n");
+}
+void ChatBot::User(string username)
+{
+    connect->Send("USER " + username + " 0 0  :" + username + "\r\n");
+}
+void ChatBot::Join(string channel)
+{
+    connect->SetChannel(channel);
+}
+void ChatBot::Leave(string channel)
+{
+    connect->Send("PART #" + channel + "\r\n");
 }
 
-void ChatBot::pingpong(string m)
+int ChatBot::ChatBotFunctions(string buffer)
 {
+    BufParse data(buffer);
+    int pos=0;
 
-}
-void ChatBot::botIdentify(string nick, string user, string pw)
-{
+    if (bLogging)
+    {
+        stringstream buf;
+        for(int i=0;i<(int)data.message.size();i++)
+            buf << data.message[i] << " ";
+        if (data.message.size() > 0)
+            LogMsg(data.sender, buf.str());
+    }
 
-}
+    if( (pos=data.atPosition("-topic")) != -1 && (int)data.message.size() > pos+1)
+    {
+        ChangeTopic(data.message[pos+1]);
+        connect->Send("PRIVMSG #" + connect->GetChannel() + " :topic changed\r\n");
+    }
+    if( (pos=data.atPosition("-nick")) != -1 && (int)data.message.size() > pos+1 )
+    {
+        Nick(data.message[pos+1]);
+        connect->Send("PRIVMSG #" + connect->GetChannel() + " :name changed\r\n");
+    }
+    if( (pos=data.atPosition("-join")) != -1 && (int)data.message.size() > pos+1 )
+    {
+        Join( data.message[pos+1] );
+    }
+    if( (pos=data.atPosition("-leave")) != -1 && (int)data.message.size() > pos+1 )
+    {
+        connect->Send("PRIVMSG #" + connect->GetChannel() + " :ciao!\r\n");
+        Leave( data.message[pos+1] );
+    }
+    if((pos=data.atPosition("-show_log")) != -1 )
+    {
+        //ShowLog();
+    }
+    if ((pos=data.atPosition("-last_seen")) != -1 && data.message.size() > pos+1)
+    {
+        //ShowLastSeen(data.message[pos+1]);
+    }
+    if ((pos=data.atPosition("-exit")) != -1 )
+    {
+        connect->Send("PRIVMSG #" + connect->GetChannel() + " :cya!\r\n");
+        connect->Send("QUIT cya\r\n");
+        return -1;
+    }
+    if ((pos=data.atPosition("-log")) != -1 && (int)data.message.size() > pos+1 ) {
+        if (data.message[pos+1] == "on" )
+        {
+            bLogging = true;
+            connect->Send("PRIVMSG #" + connect->GetChannel() + " :chat logging on\r\n");
+        } else if( data.message[pos+1] == "off" )
+        {
+            bLogging = false;
+            connect->Send("PRIVMSG #" + connect->GetChannel() + " :chat logging on\r\n");
+        }
+    }
 
-void ChatBot::botSkills(string m)
-{
-
-}
-
-void ChatBot::botLoop()
-{
-
+    return 0;
 }

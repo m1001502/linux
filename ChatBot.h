@@ -1,39 +1,43 @@
 #ifndef CHATBOT_H
 #define CHATBOT_H
 
-#include <iostream>
-#include <string>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <time.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
+#include <vector>
+#include <algorithm>
+#include <sstream>
 
-using namespace std;
+#include <sqlite3.h>
 
-class ChatBot {
+#include "IrcConnect.h"
+
+
+class ChatBot
+{
 public:
-    ChatBot();
+    ChatBot(string nickname, string password);
     ~ChatBot();
 
-    int sock;
+    void            ChatBotLoop();
 
-    void    connectToServer(const char *host, int port);
-    void    disconnect();
+    IrcConnect      *connect;
 
-    void    sendToServer(string m);
-    void    pingpong(string m);
-    void    botIdentify(string nick, string user, string pw);
-    void    botSkills(string m);
+    string          nickname;
+    string          password;
+    bool            bLogging;
 
-    void    botLoop();
+    void    LoginBot(string host, int port, string channel);
 
+    void    Logging(bool bLogging);
+    void    ClearLog();
+    void    LogMsg(string name, string msg);
+    void    ShowLog();
+    void    ShowLastSeen(string nickname);
+
+    int     ChatBotFunctions(string buffer);
+    void    Nick(string nickname);
+    void    User(string username);
+    void    Join(string channel);
+    void    Leave(string channel);
+    void    ChangeTopic(string topic);
 };
 
 #endif
