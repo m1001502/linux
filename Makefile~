@@ -1,3 +1,3 @@
 all:
-	g++ -c chatbot.cpp;
-	g++ main.cpp -o main chatbot.o;
+	g++ -c ChatBot.cpp;
+	g++ main.cpp -o main ChatBot.o;
