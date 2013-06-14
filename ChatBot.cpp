@@ -60,6 +60,37 @@ void ChatBot::Leave(string channel)
     connect->Send("PART #" + channel + "\r\n");
 }
 
+void ChatBot::Logging(bool bLogging)
+{
+    this->bLogging = bLogging;
+}
+void ChatBot::ClearLog()
+{
+    DatabaseLogger::clearTable();
+}
+void ChatBot::LogMsg(string name, string msg) {
+    int t = time(0);
+    stringstream date; date << t;
+    DatabaseLogger::insertLog(date.str().c_str(), name.c_str(), msg.c_str());
+}
+void ChatBot::ShowLog()
+{
+    string chat_log = DatabaseLogger::getChatLog();
+    if (!chat_log.empty())
+        connect->Send("PRIVMSG #" + connect->GetChannel() + "  :" + chat_log + "\r\n");
+    else
+        connect->Send("PRIVMSG #" + connect->GetChannel() + "  :Kein Log vorhanden...\r\n");
+}
+void ChatBot::ShowLastSeen(string nickname)
+{
+    string date = DatabaseLogger::getLastSeen(nickname.c_str());
+    if (!date.empty())
+        connect->Send("PRIVMSG #" + connect->GetChannel() + " :" + date);
+    else
+        connect->Send("PRIVMSG #" + connect->GetChannel() + " :" + nickname + " wurde noch nicht geloggt...\r\n");
+}
+
+
 int ChatBot::ChatBotFunctions(string buffer)
 {
     BufParse data(buffer);

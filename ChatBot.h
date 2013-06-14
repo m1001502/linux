@@ -8,7 +8,8 @@
 #include <sqlite3.h>
 
 #include "IrcConnect.h"
-
+#include "DatabaseLogger.h"
+#include "BufParse.h"
 
 class ChatBot
 {
