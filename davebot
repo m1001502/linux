@@ -1,0 +1,35 @@
+.TH  "" "" 
+.SS IRC-BOT
+.PP
+Dave-Bot
+.SS SYNOPSIS
+.PP
+\&./daveBot server port channel
+.SS DESCRIPTION
+.IP \[bu] 2
+Der DaveBot kann sich auf einem IRC-Server anmelden und dort auf
+bestimmte Nachrichten reagieren
+.IP \[bu] 2
+Server, Port und Channel müssen beim Start übergeben werden.
+.PP
+Der Bot reagiert auf folgende Nachrichten:
+.SS OPTIONS
+.IP \[bu] 2
+-nick name - um den Namen des Bots zu ändern
+.IP \[bu] 2
+-log on/off - um den Chat mitzuloggen oder nicht
+.IP \[bu] 2
+-last_seen name - um zu sehen wann welcher User etwas geschrieben hat
+.IP \[bu] 2
+-show_log - um den Chatlog anzuzeigen
+.IP \[bu] 2
+-join channel - den Bot einen channel beitreten lassen
+.IP \[bu] 2
+-leave channel - den Bot einen channel verlassen lassen
+.IP \[bu] 2
+-topic channel text - um das Topic in einem channel zu ändern
+.IP \[bu] 2
+-exit - um den Bot abzumelden
+.SS AUTHOR
+.PP
+David Fremgen m1001502\@fh-heidelberg.de
