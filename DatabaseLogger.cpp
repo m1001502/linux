@@ -42,7 +42,7 @@ string DatabaseLogger::getLastSeen(const char *name) {
     sqlite3_stmt *stmt;
 
 	stringstream sstr;
-	sstr << "SELECT * FROM LOG WHERE nickname = '" << name << "' ORDER BY date DESC LIMIT 1";
+	sstr << "SELECT * FROM LOG WHERE name = '" << name << "' ORDER BY date DESC LIMIT 1";
 	sqlite3_prepare(db, sstr.str().c_str(), -1, &stmt, NULL);
 
     struct  tm   *timeinfo;

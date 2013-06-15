@@ -7,7 +7,7 @@ ChatBot::ChatBot(string nickname, string password)
     this->password = password;
     this->bLogging = false;
     connect = NULL;
-
+    DatabaseLogger::init("davebotLog.sqlite");
 }
 
 // Destruktor
@@ -126,11 +126,11 @@ int ChatBot::ChatBotFunctions(string buffer)
     }
     if((pos=data.atPosition("-show_log")) != -1 )
     {
-        //ShowLog();
+        ShowLog();
     }
     if ((pos=data.atPosition("-last_seen")) != -1 && data.message.size() > pos+1)
     {
-        //ShowLastSeen(data.message[pos+1]);
+        ShowLastSeen(data.message[pos+1]);
     }
     if ((pos=data.atPosition("-exit")) != -1 )
     {
